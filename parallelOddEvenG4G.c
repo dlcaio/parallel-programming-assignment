@@ -3,6 +3,8 @@
 #include <string.h>
 #include <mpi.h>
 
+#define ARRAY_SIZE 8
+
 void printArray(int *array, int n)
 {
   printf("[ ");
@@ -13,84 +15,66 @@ void printArray(int *array, int n)
   printf("]\n");
 }
 
+void compareExchange(int *array, int rank, int odd)
+{
+  int pos = rank * 2 + odd;
+  if (array[pos] > array[pos + 1])
+  {
+    int temp = array[pos];
+    array[pos] = array[pos + 1];
+    array[pos + 1] = temp;
+  }
+}
+
 int main(int argc, char **argv)
 {
   int rank, size;
-  int *inner_array = malloc(sizeof(int) * 16);
-  int initial_array[8] = {2, 1, 9, 4, 5, 3, 6, 10};
+  int initial_array[ARRAY_SIZE] = {9, 4, 2, 1, 5, 3, 6, 10};
+
   MPI_Init(&argc, &argv);
   MPI_Comm_rank(MPI_COMM_WORLD, &rank);
   MPI_Comm_size(MPI_COMM_WORLD, &size);
 
-  for (int i = 0; i < 8; i++)
+  // One even and one odd iteration for each i in ARRAY_SIZE
+  for (int i = 0; i < ARRAY_SIZE; i++)
   {
-    int temp[2];
-    int firstElement = initial_array[rank * 2];
-    int secondElement = initial_array[rank * 2 + 1];
 
-    if (secondElement < firstElement)
-    {
-      temp[0] = secondElement;
-      temp[1] = firstElement;
-    }
-    else
-    {
-      temp[0] = firstElement;
-      temp[1] = secondElement;
-    }
+    // Even iteration
 
-    // printf("Process number %d, analysing number [%d, %d]... %d is greater than %d\n", rank, firstElement, secondElement, temp[1], temp[0]);
+    // Compare exchange 0-1, 2-3...
+    compareExchange(initial_array, rank, 0);
 
-    // if (rank == 0)
-
-    //  printArray(initial_array, 8);
-
-    MPI_Barrier(MPI_COMM_WORLD);
-
-    memcpy(initial_array + rank * 2, temp, 2 * sizeof(int));
-
-    MPI_Barrier(MPI_COMM_WORLD);
-
+    // Insert compared-exchanged values in initial array for all processes
     MPI_Allgather(initial_array + rank * 2, 2, MPI_INT, initial_array, 2, MPI_INT, MPI_COMM_WORLD);
 
-    MPI_Barrier(MPI_COMM_WORLD);
+    // Odd iteration
 
-    MPI_Comm new_comm;
-    int color = (rank < 3);
-    MPI_Comm_split(MPI_COMM_WORLD, color, rank, &new_comm);
+    // Create communicator for odd iteration, since last process won't do work in this iteration
+    MPI_Comm ODD_COMM;
+    MPI_Comm_split(MPI_COMM_WORLD, (rank < 3), rank, &ODD_COMM);
 
-    if ((rank * 2 + 1) != 7)
+    // Check if process is the last one
+    if ((rank * 2 + 1) != ARRAY_SIZE - 1)
     {
-      int firstElement = initial_array[rank * 2 + 1];
-      int secondElement = initial_array[rank * 2 + 2];
-
-      if (secondElement < firstElement)
-      {
-        temp[0] = secondElement;
-        temp[1] = firstElement;
-      }
-      else
-      {
-        temp[0] = firstElement;
-        temp[1] = secondElement;
-      }
-      MPI_Barrier(new_comm);
-      printf("Process number %d, analysing number [%d, %d]... %d is greater than %d\n", rank, firstElement, secondElement, temp[1], temp[0]);
-      MPI_Barrier(new_comm);
+      // Compare exchange 1-2, 3-4...
+      compareExchange(initial_array, rank, 1);
       
-      memcpy(initial_array + rank * 2 + 1, temp, 2 * sizeof(int));
-      printArray(initial_array, 8);
-      MPI_Barrier(new_comm);
-      MPI_Allgather(initial_array + rank * 2 + 1, 2, MPI_INT, initial_array + 1, 2, MPI_INT, new_comm);
-      printArray(initial_array, 8);
-      MPI_Barrier(new_comm);
-      if (rank == 0) MPI_Send(initial_array, 8, MPI_INT, size - 1, 0, MPI_COMM_WORLD);
-    } else {
-      MPI_Recv(initial_array, 8, MPI_INT, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+      // Insert compared-exchanged values in initial array for all processes
+      MPI_Allgather(initial_array + rank * 2 + 1, 2, MPI_INT, initial_array + 1, 2, MPI_INT, ODD_COMM);
+      
+      // Send whole array from process 0 to last process
+      if (rank == 0)
+        MPI_Send(initial_array, ARRAY_SIZE, MPI_INT, size - 1, 0, MPI_COMM_WORLD);
+    }
+    // If process is the last one, receive whole array sent by process 0
+    else
+    {
+      MPI_Recv(initial_array, ARRAY_SIZE, MPI_INT, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
     }
   }
 
-  free(inner_array);
+  if (rank == 0) printArray(initial_array, ARRAY_SIZE);
+
   MPI_Finalize();
   return 0;
 }

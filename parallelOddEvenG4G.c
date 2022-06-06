@@ -24,7 +24,7 @@ int main(int argc, char **argv)
 
   for (int i = 0; i < 8; i++)
   {
-    int temp[3];
+    int temp[2];
     int firstElement = initial_array[rank * 2];
     int secondElement = initial_array[rank * 2 + 1];
 
@@ -41,44 +41,25 @@ int main(int argc, char **argv)
 
     // printf("Process number %d, analysing number [%d, %d]... %d is greater than %d\n", rank, firstElement, secondElement, temp[1], temp[0]);
 
-    if (rank == 0)
+    // if (rank == 0)
 
-    printArray(initial_array, 8);
+    //  printArray(initial_array, 8);
 
     MPI_Barrier(MPI_COMM_WORLD);
 
     memcpy(initial_array + rank * 2, temp, 2 * sizeof(int));
-    
-    MPI_Barrier(MPI_COMM_WORLD);
 
-    // MPI_Bcast(initial_array + rank * 2, 2, MPI_INT, rank, MPI_COMM_WORLD);
+    MPI_Barrier(MPI_COMM_WORLD);
 
     MPI_Allgather(initial_array + rank * 2, 2, MPI_INT, initial_array, 2, MPI_INT, MPI_COMM_WORLD);
 
     MPI_Barrier(MPI_COMM_WORLD);
 
-    // MPI_Bcast(initial_array + rank * 2, temp, 2 * sizeof(int));
+    MPI_Comm new_comm;
+    int color = (rank < 3);
+    MPI_Comm_split(MPI_COMM_WORLD, color, rank, &new_comm);
 
-
-
-    /*
-
-    for (int j = 0; j < size; j++) {
-      if (j != rank) {
-        MPI_Send(temp, 3, MPI_INT, j, 0, MPI_COMM_WORLD);
-        MPI_Recv(temp2, 3, MPI_INT, j, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-      }
-    }
-
-    */
-
-    // memcpy(initial_array + temp2[2], temp, 2 * sizeof(int));
-    // memcpy(initial_array + temp[2], temp, 2 * sizeof(int));
-
-    /*
-
-    MPI_Barrier(MPI_COMM_WORLD);
-    if (!(rank * 2 + 1 == 7))
+    if ((rank * 2 + 1) != 7)
     {
       int firstElement = initial_array[rank * 2 + 1];
       int secondElement = initial_array[rank * 2 + 2];
@@ -93,9 +74,20 @@ int main(int argc, char **argv)
         temp[0] = firstElement;
         temp[1] = secondElement;
       }
+      MPI_Barrier(new_comm);
+      printf("Process number %d, analysing number [%d, %d]... %d is greater than %d\n", rank, firstElement, secondElement, temp[1], temp[0]);
+      MPI_Barrier(new_comm);
+      
+      memcpy(initial_array + rank * 2 + 1, temp, 2 * sizeof(int));
+      printArray(initial_array, 8);
+      MPI_Barrier(new_comm);
+      MPI_Allgather(initial_array + rank * 2 + 1, 2, MPI_INT, initial_array + 1, 2, MPI_INT, new_comm);
+      printArray(initial_array, 8);
+      MPI_Barrier(new_comm);
+      if (rank == 0) MPI_Send(initial_array, 8, MPI_INT, size - 1, 0, MPI_COMM_WORLD);
+    } else {
+      MPI_Recv(initial_array, 8, MPI_INT, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
     }
-
-    */
   }
 
   free(inner_array);

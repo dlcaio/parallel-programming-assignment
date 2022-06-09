@@ -3,7 +3,7 @@
 #include <string.h>
 #include <mpi.h>
 
-#define ARRAY_SIZE 32
+#define ARRAY_SIZE 128
 
 void printArray(int *array, int n)
 {
@@ -29,7 +29,7 @@ void compareExchange(int *array, int posWithoutOdd, int odd)
 int main(int argc, char **argv)
 {
   int rank, size;
-  int initial_array[ARRAY_SIZE] = {9, 4, 120, 1, 5, 50, 6, -10, 19, 14, 12, 11, 15, 110, 13, 16, -9, 40, 1231, 12, 55, -50, 6666, -102, 194, 140, 12, 11, -15, -110, 132, 16};
+  int initial_array[ARRAY_SIZE] = {-61, -33, -83, -31, -1, 95, -72, -62, 94, 38, -70, 6, 74, -100, 61, 56, -5, -67, -56, 79, -50, 64, 9, 9, -85, 33, -54, 10, 66, 39, 18, 69, -78, -39, 15, -68, 64, -86, 63, 24, 26, -26, 47, 15, -35, -2, 37, 60, 23, -33, -76, -90, -17, 46, -46, 69, 54, 20, 72, -37, -44, -10, 8, 80, -74, 7, -12, -80, -78, -97, -87, 80, -70, 74, 45, 12, -8, 46, -35, 62, -69, 4, -50, -1, -100, -33, 0, -58, -30, -53, 85, -54, -2, 31, -62, -91, -40, 59, -24, -53, 33, 62, -72, 39, -72, 70, 92, -46, -72, 92, 46, -26, -2, 53, -33, 18, 56, 73, 59, -69, -76, 87, 32, -68, -28, -55, -55, -66};
   MPI_Init(&argc, &argv);
   MPI_Comm_rank(MPI_COMM_WORLD, &rank);
   MPI_Comm_size(MPI_COMM_WORLD, &size);

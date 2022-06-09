@@ -1,9 +1,45 @@
-# Distributed Programming Lab - Caio Della Libera & Renan Valladão - BubbleSort
+# Distributed Programming Lab Assignment - BubbleSort
 
-## Application description
+Done by Caio Della Libera & Renan Valladão
 
-#### Bubble Sort
+## Algorithm description
 
-#### Odd-even Sort
+Bubble Sort
 
-### Odd-even Transposition
+### Sequential Algorithm
+
+Bubble Sort Sequential Description
+
+### Odd-even Sort Algorithm
+
+Bubble Sort Odd-even Description
+
+## Parallel Algorithm
+
+### Geeks For Geeks
+
+### Article
+
+## Parallel Application
+
+### MPI
+
+### OpenMP
+
+## Results
+
+### MPI
+
+### OpenMP
+
+## Conclusions
+
+## MPI
+
+### OpenMP
+
+## References
+
+- https://www.geeksforgeeks.org/odd-even-transposition-sort-brick-sort-using-pthreads/
+
+- http://www.hpcc.unn.ru/mskurs/ENG/DOC/pp10.pdf

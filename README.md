@@ -1,4 +1,4 @@
-# Distributed Programming Lab Assignment - BubbleSort
+# Parallel Programming Lab Assignment - BubbleSort
 
 Done by Caio Della Libera & Renan Valladão
 

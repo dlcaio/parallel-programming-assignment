@@ -34,7 +34,7 @@ Bubble Sort Odd-even Description
 
 ## Conclusions
 
-## MPI
+### MPI
 
 ### OpenMP
 

@@ -39,26 +39,18 @@ int main(int argc, char **argv)
   // One even and one odd iteration for each i in ARRAY_SIZE
   for (int i = 0; i < ARRAY_SIZE; i++)
   {
-    int pos;
     for (int j = 0; j < nIterationsPerProcess; j++)
     {
-      pos = (rank * 2) + j * 2 * size;
+      int pos = (rank * 2) + j * 2 * size;
+
       compareExchange(initial_array, pos, 0);
       MPI_Allgather(initial_array + pos, 2, MPI_INT, initial_array + j * 2 * size, 2, MPI_INT, MPI_COMM_WORLD);
-    }
-
-    for (int j = 0; j < nIterationsPerProcess; j++)
-    {
-      pos = (rank * 2) + j * 2 * size;
 
       MPI_Comm ODD_COMM;
-
       if (j == nIterationsPerProcess - 1)
         MPI_Comm_split(MPI_COMM_WORLD, rank < size - 1, rank, &ODD_COMM);
       else
         ODD_COMM = MPI_COMM_WORLD;
-
-      MPI_Barrier(MPI_COMM_WORLD);
 
       if (pos + 1 != ARRAY_SIZE - 1)
       {

@@ -55,6 +55,7 @@ int main(int argc, char **argv) {
     int initialArray[arraySize];
     int elementsPerArray = arraySize / size;
     int innerArray[elementsPerArray];
+    int innerArrayToSort[elementsPerArray * 2];
     if (rank == 0) {
         populateArray(initialArray, arraySize);
         printf("Array to be sorted: ");
@@ -63,7 +64,6 @@ int main(int argc, char **argv) {
     MPI_Scatter(initialArray, elementsPerArray, MPI_INT, innerArray, elementsPerArray, MPI_INT, 0, MPI_COMM_WORLD);
     MPI_Barrier(MPI_COMM_WORLD);
     for (int i = 0; i < size; i++) {
-        int innerArrayToSort[elementsPerArray * 2];
         MPI_Barrier(MPI_COMM_WORLD);
         memcpy(innerArrayToSort, innerArray, elementsPerArray * sizeof(int));
         if (i % 2 == 0) { // Even iteration

@@ -62,9 +62,7 @@ int main(int argc, char **argv) {
         printArray(initialArray, arraySize);
     }
     MPI_Scatter(initialArray, elementsPerArray, MPI_INT, innerArray, elementsPerArray, MPI_INT, 0, MPI_COMM_WORLD);
-    MPI_Barrier(MPI_COMM_WORLD);
     for (int i = 0; i < size; i++) {
-        MPI_Barrier(MPI_COMM_WORLD);
         memcpy(innerArrayToSort, innerArray, elementsPerArray * sizeof(int));
         if (i % 2 == 0) { // Even iteration
             if (rank % 2 == 0) { // Even process number
@@ -92,7 +90,6 @@ int main(int argc, char **argv) {
             }
         }
     }
-    MPI_Barrier(MPI_COMM_WORLD);
     MPI_Gather(innerArray, elementsPerArray, MPI_INT, initialArray, elementsPerArray, MPI_INT, 0, MPI_COMM_WORLD);
     if (rank == 0) {
         printf("Sorted array: ");

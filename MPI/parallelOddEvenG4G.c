@@ -49,7 +49,7 @@ int main(int argc, char **argv) {
     int nIterationsPerProcess = arraySize / (size * 2);
 
     // One even and one odd iteration for each i in arraySize
-    for (int i = 0; i < arraySize; i++) {
+    for (int i = 0; i < arraySize / 2; i++) {
         for (int j = 0; j < nIterationsPerProcess; j++) {
             int pos = (rank * 2) + j * 2 * size;
 

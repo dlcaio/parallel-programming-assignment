@@ -62,11 +62,23 @@ int main(int argc, char **argv) {
     // One even and one odd iteration for each i in arraySize
     for (int i = 0; i < arraySize / 2; i++) {
         for (int j = 0; j < nIterationsPerProcess; j++) {
-            int pos = (rank * 2) + j * 2 * size;
+            // int pos = (rank * 2) + j * 2 * size;
 
+            // compareExchange(initialArray, pos, 0);
+            // 
+
+            int pos = (rank * 2) * nIterationsPerProcess + 2 * j;
             compareExchange(initialArray, pos, 0);
-            MPI_Allgather(initialArray + pos, 2, MPI_INT, initialArray + j * 2 * size, 2, MPI_INT, MPI_COMM_WORLD);
+
+            // p0: 0  rank * nIterationsPerProcess
+            //   : 2  (rank * 2) * nIterationsPerProcess
+            // p1: 4  (rank * 2) * nIterationsPerProcess
+            //   : 6  (rank * 2) * nIterationsPerProcess + 2
+            // p2: 8
+            //   : 10
         }
+
+        MPI_Allgather(initialArray + rank * 2 * nIterationsPerProcess, 2 * nIterationsPerProcess, MPI_INT, initialArray,  2 * nIterationsPerProcess, MPI_INT, MPI_COMM_WORLD);
 
         for (int j = 0; j < nIterationsPerProcess; j++) {
             int pos = (rank * 2) + j * 2 * size;

@@ -17,6 +17,17 @@ void bubbleSort(int *array, int n) {
     }
 }
 
+int isSorted(int *array, int n) {
+    int prevElem = array[0];
+    for (int i = 1; i < n; i++) {
+        if (prevElem > array[i]) {
+            return 0;
+        }
+        prevElem = array[i];
+    }
+    return 1;
+}
+
 void populateArray(int *array, int n) {
     srand(time(NULL));
     for (int i = 0; i < n; i++) {
@@ -101,6 +112,7 @@ int main(int argc, char **argv) {
 //        printf("Sorted array: ");
 //        printArray(initialArray, arraySize);
         printf("Duration: %lfs\n", duration);
+        printf("Is sorted? %d\n", isSorted(initialArray, arraySize));
     }
     MPI_Finalize();
     return 0;

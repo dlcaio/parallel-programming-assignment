@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <mpi.h>
+#include <time.h>
 
 void bubbleSort(int *array, int n) {
     int temp;
@@ -17,6 +18,7 @@ void bubbleSort(int *array, int n) {
 }
 
 void populateArray(int *array, int n) {
+    srand(time(NULL));
     for (int i = 0; i < n; i++) {
         array[i] = rand() % 100;
     }
@@ -56,10 +58,13 @@ int main(int argc, char **argv) {
     int elementsPerArray = arraySize / size;
     int innerArray[elementsPerArray];
     int innerArrayToSort[elementsPerArray * 2];
+    double duration = 0.0;
     if (rank == 0) {
+        printf("Parallel OddEven Chunks Version\n");
         populateArray(initialArray, arraySize);
-        printf("Array to be sorted: ");
-        printArray(initialArray, arraySize);
+//        printf("Array to be sorted: ");
+//        printArray(initialArray, arraySize);
+        duration -= MPI_Wtime();
     }
     MPI_Scatter(initialArray, elementsPerArray, MPI_INT, innerArray, elementsPerArray, MPI_INT, 0, MPI_COMM_WORLD);
     for (int i = 0; i < size; i++) {
@@ -92,8 +97,10 @@ int main(int argc, char **argv) {
     }
     MPI_Gather(innerArray, elementsPerArray, MPI_INT, initialArray, elementsPerArray, MPI_INT, 0, MPI_COMM_WORLD);
     if (rank == 0) {
-        printf("Sorted array: ");
-        printArray(initialArray, arraySize);
+        duration += MPI_Wtime();
+//        printf("Sorted array: ");
+//        printArray(initialArray, arraySize);
+        printf("Duration: %lfs\n", duration);
     }
     MPI_Finalize();
     return 0;

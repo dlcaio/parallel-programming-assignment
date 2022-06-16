@@ -56,7 +56,13 @@ int main(int argc, char **argv) {
             compareExchange(initialArray, pos, 0);
             MPI_Allgather(initialArray + pos, 2, MPI_INT, initialArray + j * 2 * size, 2, MPI_INT, MPI_COMM_WORLD);
 
-            MPI_Comm ODD_COMM;
+            
+        }
+
+        for (int j = 0; j < nIterationsPerProcess; j++) {
+          int pos = (rank * 2) + j * 2 * size;
+
+          MPI_Comm ODD_COMM;
             if (j == nIterationsPerProcess - 1)
                 MPI_Comm_split(MPI_COMM_WORLD, rank < size - 1, rank, &ODD_COMM);
             else
@@ -77,13 +83,15 @@ int main(int argc, char **argv) {
                 // If process is the last one, receive whole array sent by process 0
             else
                 MPI_Recv(initialArray, arraySize, MPI_INT, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+
         }
+
     }
 
     if (rank == 0) {
         duration += MPI_Wtime();
-//        printf("Sorted array: ");
-//        printArray(initialArray, arraySize);
+        printf("Sorted array: ");
+        printArray(initialArray, arraySize);
         printf("Duration: %lfs\n", duration);
     }
 

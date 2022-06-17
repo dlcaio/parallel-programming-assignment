@@ -89,8 +89,8 @@ void printArray(int *array, int n) {
     printf("]\n");
 }
 
-void compareExchange(int *array, int posWithoutOdd, int odd) {
-    int pos = posWithoutOdd + odd;
+void compareExchange(int *array, int pos) {
+    // int pos = posWithoutOdd + odd;
     if (array[pos] > array[pos + 1]) {
         int temp = array[pos];
         array[pos] = array[pos + 1];
@@ -110,46 +110,61 @@ int main(int argc, char **argv) {
 
     if (rank == 0) {
         printf("Parallel OddEven GeeksForGeeks Version\n");
+        // Populate Array to be sorted
         populateArray(initialArray, arraySize);
+        // Duplicate Array to be sorted to sanity check at the end of execution
         memcpy(saneArray, initialArray, arraySize * sizeof(int));
         // printf("Array to be sorted: ");
         // printArray(initialArray, arraySize);
+        // Sort sanity check array
         mergeSort(saneArray, 0, arraySize - 1);
         duration -= MPI_Wtime();
     }
+
+    // Broadcast Array to be sorted to all processes
     MPI_Bcast(initialArray, arraySize, MPI_INT, 0, MPI_COMM_WORLD);
 
-    int displacements[size], counts[size];
 
+    // Initializing data to be later used at the Odd Step by ALLGATHERV
+    int displacements[size], counts[size];
     for (int i = 0; i < size; i++) {
         displacements[i] = (arraySize / size) * i + 1;
         counts[i] = arraySize / size - (i == size - 1);
     }
 
+    // Calculating how many iterations per process will be necessary
     int nIterationsPerProcess = arraySize / (size * 2);
 
-    // One even and one odd iteration for each i in arraySize
+    // n / 2 iterations, each with one even and one odd step
     for (int i = 0; i < arraySize / 2; i++) {
+      
         int pos;
 
+        // Size of chunk that each process will be responsible to sorting and sending to other processes
         int eachProccessChunkSize = 2 * nIterationsPerProcess;
 
+        // Starting position of each process to perform sorting
         int startingPos = rank * eachProccessChunkSize;
 
+        // EVEN ITERATION
         for (int j = 0; j < eachProccessChunkSize; j += 2) {
             pos = startingPos + j;
-            compareExchange(initialArray, pos, 0);
+            compareExchange(initialArray, pos);
         }
-
+        
+        // Gather each piece of array on every process
         MPI_Allgather(initialArray + startingPos, eachProccessChunkSize, MPI_INT, initialArray, eachProccessChunkSize,
                       MPI_INT, MPI_COMM_WORLD);
 
+        // ODD ITERATION
         for (int j = 0; j < eachProccessChunkSize; j += 2) {
-            pos = startingPos + j;
-            if (pos + 1 != arraySize - 1)
-                compareExchange(initialArray, pos, 1);
+            pos = startingPos + j + 1;
+            // Compare-Exchage only if comparison index is inside of array's range
+            if (pos != arraySize - 1)
+                compareExchange(initialArray, pos);
         }
-
+        
+        // Gather each piece of array on every process with variable array sizes
         MPI_Allgatherv(initialArray + startingPos + 1, counts[rank], MPI_INT, initialArray, counts, displacements,
                        MPI_INT, MPI_COMM_WORLD);
     }

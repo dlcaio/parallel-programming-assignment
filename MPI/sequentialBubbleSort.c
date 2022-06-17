@@ -58,7 +58,7 @@ int main(int argc, char **argv) {
     //        printf("Sorted array: ");
     //        printArray(initialArray, arraySize);
     printf("Duration: %lfs\n", duration);
-    printf("Is sorted? %d\n", isSorted(initialArray, arraySize));
+    printf("Is it sorted? %d\n", isSorted(initialArray, arraySize));
     MPI_Finalize();
     return 0;
 }

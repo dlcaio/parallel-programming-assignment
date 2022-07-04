@@ -133,11 +133,11 @@ int main(int argc, char **argv) {
     MPI_Init(&argc, &argv);
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
     MPI_Comm_size(MPI_COMM_WORLD, &size);
-    int initialArray[arraySize];
-    int elementsPerArray = arraySize / size;
-    int innerArray[elementsPerArray];
-    int innerArrayToSort[elementsPerArray * 2];
-    int incomingArray[elementsPerArray];
+    int initialArray[arraySize]; // Array inicial a ser ordenado
+    int elementsPerArray = arraySize / size; // Tamanho do bloco interno de cada processo
+    int innerArray[elementsPerArray]; // Bloco interno de cada processo
+    int innerArrayToSort[elementsPerArray * 2]; // Bloco da união de 2 processos
+    int incomingArray[elementsPerArray]; // Bloco a ser recebido de outro processo
     int saneArray[arraySize];
     double duration = 0.0;
     if (rank == 0) {
